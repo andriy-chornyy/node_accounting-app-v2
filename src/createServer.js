@@ -7,9 +7,9 @@ const cors = require('cors');
 let userNuberId = 0;
 let expenseNuberId = 0;
 
-
 function createServer() {
   const app = express();
+
   let users = [];
   let expenses = [];
 
@@ -17,35 +17,13 @@ function createServer() {
   app.use(express.json());
 
   app.get('/expenses', (req, res) => {
+    const { userId, from, to, categories } = req.query;
+
+    console.log('req.query:-----------', req.query);
+    console.log('req.query:-----------', req.query);
+
     res.send(expenses);
   });
-
-  // app.get('/expenses', (req, res) => {
-  //   let result = expenses;
-
-  //   const { userId, from, to, categories } = req.query;
-
-  //   if (userId !== undefined) {
-  //     result = result.filter((e) => e.userId === +userId);
-  //   }
-
-  //   if (from !== undefined) {
-  //     result = result.filter((e) => new Date(e.spentAt) >= new Date(from));
-  //   }
-
-  //   if (to !== undefined) {
-  //     result = result.filter((e) => new Date(e.spentAt) <= new Date(to));
-  //   }
-
-  //   if (categories !== undefined) {
-  //     // query может быть строкой или массивом
-  //     const cats = Array.isArray(categories) ? categories : [categories];
-
-  //     result = result.filter((e) => cats.includes(e.category));
-  //   }
-
-  //   res.json(result);
-  // });
 
   app.post('/expenses', (req, res) => {
     const { userId, spentAt, title, amount, category, note } = req.body;
@@ -141,46 +119,6 @@ function createServer() {
     res.send(expense);
   });
 
-  // app.patch('/expenses/:id', (req, res) => {
-  //   const { id } = req.params;
-  //   const { userId, spentAt, title, amount, category, note } = req.body;
-
-  //   const expense = expenses.find((expense) => expense.id === +id);
-
-  //   if (!expense) {
-  //     res.sendStatus(404);
-
-  //     return;
-  //   }
-
-  //   // Обновляем только те поля, что реально передали
-  //   if (userId !== undefined) {
-  //     expense.userId = userId;
-  //   }
-
-  //   if (spentAt !== undefined) {
-  //     expense.spentAt = spentAt;
-  //   }
-
-  //   if (title !== undefined) {
-  //     expense.title = title;
-  //   }
-
-  //   if (amount !== undefined) {
-  //     expense.amount = amount;
-  //   }
-
-  //   if (category !== undefined) {
-  //     expense.category = category;
-  //   }
-
-  //   if (note !== undefined) {
-  //     expense.note = note;
-  //   }
-
-  //   res.status(200).json(expense);
-  // });
-
   app.delete('/expenses/:id', (req, res) => {
     const { id } = req.params;
 
@@ -209,10 +147,6 @@ function createServer() {
   /// ////////////////////////////////////////////////////////
 
   app.get('/users', (req, res) => {
-    // if (users.length === 0) {
-    //   return [];
-    // }
-
     res.send(users);
   });
 
@@ -327,31 +261,31 @@ module.exports = {
 //   let users = [];
 //   let expenses = [];
 
-//   // ===== Expenses =====
-//   app.get('/expenses', (req, res) => {
-//     let result = expenses;
-//     const { userId, from, to, categories } = req.query;
+  // ===== Expenses =====
+  app.get('/expenses', (req, res) => {
+    let result = expenses;
+    const { userId, from, to, categories } = req.query;
 
-//     if (userId !== undefined) {
-//       result = result.filter((e) => e.userId === +userId);
-//     }
+    if (userId !== undefined) {
+      result = result.filter((e) => e.userId === +userId);
+    }
 
-//     if (from !== undefined) {
-//       result = result.filter((e) => new Date(e.spentAt) >= new Date(from));
-//     }
+    if (from !== undefined) {
+      result = result.filter((e) => new Date(e.spentAt) >= new Date(from));
+    }
 
-//     if (to !== undefined) {
-//       result = result.filter((e) => new Date(e.spentAt) <= new Date(to));
-//     }
+    if (to !== undefined) {
+      result = result.filter((e) => new Date(e.spentAt) <= new Date(to));
+    }
 
-//     if (categories !== undefined) {
-//       const cats = Array.isArray(categories) ? categories : [categories];
+    if (categories !== undefined) {
+      const cats = Array.isArray(categories) ? categories : [categories];
 
-//       result = result.filter((e) => cats.includes(e.category));
-//     }
+      result = result.filter((e) => cats.includes(e.category));
+    }
 
-//     res.json(result);
-//   });
+    res.json(result);
+  });
 
 //   app.post('/expenses', (req, res) => {
 //     const { userId, spentAt, title, amount, category, note } = req.body;
