@@ -17,13 +17,38 @@ function createServer() {
   app.use(express.json());
 
   app.get('/expenses', (req, res) => {
+    let result = expenses;
     const { userId, from, to, categories } = req.query;
 
-    console.log('req.query:-----------', req.query);
-    console.log('req.query:-----------', req.query);
+    if (userId !== undefined) {
+      result = result.filter((e) => e.userId === +userId);
+    }
 
-    res.send(expenses);
+    if (from !== undefined) {
+      result = result.filter((e) => new Date(e.spentAt) >= new Date(from));
+    }
+
+    if (to !== undefined) {
+      result = result.filter((e) => new Date(e.spentAt) <= new Date(to));
+    }
+
+    if (categories !== undefined) {
+      const cats = Array.isArray(categories) ? categories : [categories];
+
+      result = result.filter((e) => cats.includes(e.category));
+    }
+
+    res.json(result);
   });
+
+  // app.get('/expenses', (req, res) => {
+  //   const { userId, from, to, categories } = req.query;
+
+  //   // console.log('req.query:-----------', req.query);
+  //   // console.log('req.query:-----------', req.query);
+
+  //   res.send(expenses);
+  // });
 
   app.post('/expenses', (req, res) => {
     const { userId, spentAt, title, amount, category, note } = req.body;
@@ -31,7 +56,7 @@ function createServer() {
     if (!users.find((u) => u.id === userId)) {
       res.sendStatus(400);
 
-      return [];
+      return;
     }
 
     if (
@@ -41,14 +66,14 @@ function createServer() {
     ) {
       res.sendStatus(400);
 
-      return [];
+      return;
     }
 
     const expense = {
       id: expenseNuberId,
-      // ///////////////////////////id: 0,
       userId,
       // spentAt: new Date().toISOString(),
+      // spentAt: new Date(),
       spentAt,
       title,
       amount,
@@ -57,66 +82,65 @@ function createServer() {
     };
 
     expenses.push(expense);
-
     expenseNuberId += 1;
 
     res.statusCode = 201;
     res.send(expense);
+    // return expense
   });
 
   app.get('/expenses/:id', (req, res) => {
     const { id } = req.params;
 
-    const expense = expenses.find((expense) => expense.id === +id);
+    const exp = expenses.find((expense) => expense.id === +id);
 
-    if (!expense) {
+    if (!exp) {
       res.sendStatus(404);
 
       return;
     }
 
-    res.send(expense);
-    // return expenses;
+    res.send(exp);
   });
 
   app.patch('/expenses/:id', (req, res) => {
     const { id } = req.params;
     const { userId, spentAt, title, amount, category, note } = req.body;
 
-    const expense = expenses.find((expense) => expense.id === +id);
+    const expse = expenses.find((expense) => +expense.id === +id);
 
-    if (!expense) {
-      res.sendStatus(404);
-
-      return;
+    if (!expse) {
+      return res.sendStatus(404);
     }
 
-    if (
-      typeof +userId !== 'number'
-      // typeof title !== 'string' ||
-      // title.trim() === '' ||
-      // typeof amount !== 'number' ||
-      // typeof category !== 'string'
-    ) {
-      res.sendStatus(400);
-
-      return;
+    if (userId !== undefined) {
+      expse.userId = userId;
     }
 
-    Object.assign(expense, {
-      userId,
-      spentAt,
+    if (spentAt !== undefined) {
+      expse.spentAt = spentAt;
+    }
 
-      title,
-      amount,
-      // spentAt: new Date().toISOString(),
-      category,
-      note,
-    });
-    res.sendStatus(200);
-    res.sendHeader('OK');
+    if (title !== undefined) {
+      expse.title = title;
+    }
 
-    res.send(expense);
+    if (amount !== undefined) {
+      expse.amount = amount;
+    }
+
+    if (category !== undefined) {
+      expse.category = category;
+    }
+
+    if (note !== undefined) {
+      expse.note = note;
+    }
+
+    // res.sendStatus(200);
+    // res.sendHeader('OK');
+    // res.status(200).json(expense)
+    return res.status(200).json(expse);
   });
 
   app.delete('/expenses/:id', (req, res) => {
@@ -178,24 +202,24 @@ function createServer() {
   app.get('/users/:id', (req, res) => {
     const { id } = req.params;
 
-    const user = users.find((user) => user.id === +id);
+    const us = users.find((user) => user.id === +id);
 
-    if (!user) {
+    if (!us) {
       res.sendStatus(404);
 
       return;
     }
 
-    res.send(user);
+    res.send(us);
   });
 
   app.patch('/users/:id', (req, res) => {
     const { id } = req.params;
     const { name } = req.body;
 
-    const user = users.find((user) => user.id === +id);
+    const ser = users.find((user) => user.id === +id);
 
-    if (!user) {
+    if (!ser) {
       res.sendStatus(404);
 
       return;
@@ -204,12 +228,12 @@ function createServer() {
     if (typeof name !== 'string') {
       res.sendStatus(422);
 
-      return;
+      return; 
     }
 
-    Object.assign(user, { name });
+    Object.assign(ser, { name });
 
-    res.send(user);
+    res.send(ser);
   });
 
   app.delete('/users/:id', (req, res) => {
@@ -261,31 +285,31 @@ module.exports = {
 //   let users = [];
 //   let expenses = [];
 
-  // ===== Expenses =====
-  app.get('/expenses', (req, res) => {
-    let result = expenses;
-    const { userId, from, to, categories } = req.query;
+// ===== Expenses =====
+// app.get('/expenses', (req, res) => {
+//   let result = expenses;
+//   const { userId, from, to, categories } = req.query;
 
-    if (userId !== undefined) {
-      result = result.filter((e) => e.userId === +userId);
-    }
+//   if (userId !== undefined) {
+//     result = result.filter((e) => e.userId === +userId);
+//   }
 
-    if (from !== undefined) {
-      result = result.filter((e) => new Date(e.spentAt) >= new Date(from));
-    }
+//   if (from !== undefined) {
+//     result = result.filter((e) => new Date(e.spentAt) >= new Date(from));
+//   }
 
-    if (to !== undefined) {
-      result = result.filter((e) => new Date(e.spentAt) <= new Date(to));
-    }
+//   if (to !== undefined) {
+//     result = result.filter((e) => new Date(e.spentAt) <= new Date(to));
+//   }
 
-    if (categories !== undefined) {
-      const cats = Array.isArray(categories) ? categories : [categories];
+//   if (categories !== undefined) {
+//     const cats = Array.isArray(categories) ? categories : [categories];
 
-      result = result.filter((e) => cats.includes(e.category));
-    }
+//     result = result.filter((e) => cats.includes(e.category));
+//   }
 
-    res.json(result);
-  });
+//   res.json(result);
+// });
 
 //   app.post('/expenses', (req, res) => {
 //     const { userId, spentAt, title, amount, category, note } = req.body;
