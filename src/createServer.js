@@ -4,8 +4,8 @@ const express = require('express');
 const cors = require('cors');
 // const { v4: uuidv4 } = require('uuid');
 
-let userNuberId = 0;
-let expenseNuberId = 0;
+let nextUserId = 0;
+let nextExpenseId = 0;
 
 function createServer() {
   const app = express();
@@ -70,7 +70,7 @@ function createServer() {
     }
 
     const expense = {
-      id: expenseNuberId,
+      id: nextExpenseId,
       userId,
       // spentAt: new Date().toISOString(),
       // spentAt: new Date(),
@@ -82,7 +82,7 @@ function createServer() {
     };
 
     expenses.push(expense);
-    expenseNuberId += 1;
+    nextExpenseId += 1;
 
     res.statusCode = 201;
     res.send(expense);
@@ -163,7 +163,7 @@ function createServer() {
     expenses = newExpenses;
 
     res.sendStatus(204);
-    res.send(expenses);
+    // res.send(expenses);
 
     // if ()
   });
@@ -184,11 +184,11 @@ function createServer() {
     }
 
     const user = {
-      id: userNuberId,
+      id: nextUserId,
       name,
     };
 
-    userNuberId += 1;
+    nextUserId += 1;
 
     users.push(user);
 
@@ -196,7 +196,7 @@ function createServer() {
 
     res.send(user);
 
-    return user;
+    // return user;
   });
 
   app.get('/users/:id', (req, res) => {
@@ -225,10 +225,11 @@ function createServer() {
       return;
     }
 
-    if (typeof name !== 'string') {
-      res.sendStatus(422);
+    if (typeof name !== 'string' || name.trim() === '') {
+      return res.sendStatus(400);
+      // res.sendStatus(422);
 
-      return; 
+      // return;
     }
 
     Object.assign(ser, { name });
